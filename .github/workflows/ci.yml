@@ -33,8 +33,12 @@ jobs:
       - name: Get changed files
         id: changed-files
         run: |
-          # Get list of changed .js files in this PR
-          CHANGED_FILES=$(git diff --name-only origin/main...HEAD | grep '\.js$' | tr '\n' ' ')
+          # Get list of changed .js files in this PR, but only include paths that still exist.
+          CHANGED_FILES=$(git diff --name-only origin/main...HEAD -- '*.js' | while read -r file; do
+            if [ -f "$file" ]; then
+              printf '%s ' "$file"
+            fi
+          done)
           echo "files=$CHANGED_FILES" >> $GITHUB_OUTPUT
           echo "Changed files: $CHANGED_FILES"
 
